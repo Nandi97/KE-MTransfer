@@ -70,4 +70,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Account::class);
     }
+
+    public function primaryAccount()
+    {
+        return $this->hasOne(Account::class)->where('is_primary', true);
+    }
 }

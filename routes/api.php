@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\MpesaController;
 use App\Http\Controllers\OTPController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -48,6 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/accounts', [AccountController::class, 'index']);
     Route::post('/accounts', [AccountController::class, 'store']);
+    Route::put('/accounts/{id}', [AccountController::class, 'update']);
+    Route::delete('/accounts/{id}', [AccountController::class, 'destroy']);
+    Route::get('/accounts/primary', [AccountController::class, 'primary']);
 
     //OTP
     Route::post('/otp/send', [OTPController::class, 'send']);
@@ -55,4 +60,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Account Sync
     Route::post('/accounts/{id}/refresh', [AccountController::class, 'refresh']);
+
+    //Trigger Sync
+    Route::post('/admin/sync-balances', [AdminController::class, 'syncBalances']);
+
+    // Mpesa Balance
+    Route::get('/mpesa/balance', [MpesaController::class, 'getBalance']);
 });
+
+Route::post('/mpesa/balance/result', [MpesaController::class, 'balanceResult']);
+Route::post('/mpesa/balance/timeout', [MpesaController::class, 'balanceTimeout']);

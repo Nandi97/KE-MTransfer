@@ -88,6 +88,24 @@ class AccountController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        $account = Auth::user()->accounts()->findOrFail($id);
+
+        $data = $request->validate([
+            'provider_name' => 'nullable|string',
+            'is_primary' => 'nullable|boolean',
+        ]);
+
+        if (isset($data['is_primary']) && $data['is_primary'] === true) {
+            // Unset all other primaries
+            Auth::user()->accounts()->where('id', '!=', $account->id)->update(['is_primary' => false]);
+        }
+
+        $account->update($data);
+
+        return response()->json([
+            'message' => 'Account updated successfully.',
+            'account' => $account
+        ]);
     }
 
     /**
@@ -96,6 +114,10 @@ class AccountController extends Controller
     public function destroy(string $id)
     {
         //
+        $account = Auth::user()->accounts()->findOrFail($id);
+        $account->delete();
+
+        return response()->json(['message' => 'Account removed.']);
     }
 
     public function refresh($id)
@@ -110,5 +132,14 @@ class AccountController extends Controller
             'message' => 'Balance refreshed',
             'balance' => $account->balance
         ]);
+    }
+
+    public function primary()
+    {
+        $account = Auth::user()->primaryAccount()->first();
+
+        return $account
+            ? response()->json($account)
+            : response()->json(['message' => 'No primary account set'], 404);
     }
 }

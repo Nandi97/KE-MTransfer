@@ -97,13 +97,30 @@ class OTPController extends Controller
             ->where('code', $data['code'])
             ->where('verified', false)
             ->where('expires_at', '>', now())
+            ->latest()
             ->first();
 
         if (! $otp) {
+            VerificationCode::where('identifier', $data['identifier'])
+                ->where('verified', false)
+                ->where('expires_at', '>', now())
+                ->latest()
+                ->increment('attempts');
+
             return response()->json(['error' => 'Invalid or expired OTP'], 400);
         }
 
-        $otp->update(['verified' => true]);
+        // Mark as used
+        $otp->update([
+            'verified' => true,
+            'used_at' => now(),
+        ]);
+
+        // Block attempts if attempts >= 5
+
+        if ($otp->attempts >= 5) {
+            return response()->json(['error' => 'Too many attempts. Please request a new OTP.'], 403);
+        }
 
         return response()->json(['message' => 'OTP verified']);
     }

@@ -12,7 +12,7 @@ class SyncAccountBalances extends Command
      *
      * @var string
      */
-    protected $signature = 'accounts:sync-balances';
+    protected $signature = 'accounts:sync-balances {--type= : Only sync a specific account type (mpesa, airtel, bank)}';
 
     /**
      * The console command description.
@@ -27,13 +27,22 @@ class SyncAccountBalances extends Command
     public function handle()
     {
         //
-        $this->info("Syncing account balances...");
+        $type = $this->option('type');
 
-        $accounts = Account::all();
+        $this->info("Syncing account balances" . ($type ? " for type: $type" : ''));
+
+        $query = Account::query();
+
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        $accounts = $query->get();
 
         foreach ($accounts as $account) {
-            $account->balance = rand(100, 80000); // Mocked balance
+            $account->balance = rand(100, 80000); // Simulated value
             $account->save();
+
             $this->line("Updated {$account->type} ({$account->identifier}): KES {$account->balance}");
         }
 
