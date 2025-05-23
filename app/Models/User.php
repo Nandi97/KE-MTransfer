@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+/**
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\Account[] $accounts
+ */
 
 
 class User extends Authenticatable
@@ -36,6 +42,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+
     /**
      * Get the attributes that should be cast.
      *
@@ -47,5 +54,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+
+    /**
+     * Get the accounts associated with the user.
+     *
+     * @return HasMany
+     */
+    public function accounts(): HasMany
+    {
+        return $this->hasMany(Account::class);
     }
 }

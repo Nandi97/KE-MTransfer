@@ -9,8 +9,16 @@ class WalletController extends Controller
 {
     public function balance()
     {
-        $wallet = Auth::user()->wallet;
-        return response()->json(['balance' => $wallet->balance]);
+        $user = Auth::user();
+
+        // Ensure user has a wallet
+        if (!$user->wallet) {
+            $user->wallet->create(['balance' => 0]);
+        }
+
+        return response()->json([
+            'balance' => $user->wallet()->balance
+        ]);
     }
 
     public function fund(Request $request)
